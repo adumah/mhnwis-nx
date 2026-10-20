@@ -16,6 +16,10 @@ set(MHNWIS_SOURCES
     src/mhnwis_screenshot.cpp
 )
 
+# Diagnostic sources added for one build only, e.g. the Direct3D census (tools/d3d/census_build.py). Empty normally.
+set(MHNWIS_EXTRA_SOURCES "" CACHE STRING "Extra source files (diagnostic builds only)")
+list(APPEND MHNWIS_SOURCES ${MHNWIS_EXTRA_SOURCES})
+
 if(WIN32)
     add_executable(mhnwis WIN32 ${MHNWIS_SOURCES})
 else()
