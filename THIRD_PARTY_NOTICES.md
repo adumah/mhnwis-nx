@@ -59,6 +59,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     changes are listed at its top).
 - Because of that copied and adapted code, this project is distributed under the GPL-3.0 as well (see `LICENSE`).
 
+## Renut's renderer (reNut, banjo-nx, sa2-nx)
+
+- `app/src/renut_engine` is sa2-nx's copy of **reNut** by masterspike52 (https://github.com/masterspike52/reNut), the
+  Direct3D-level renderer, as **banjo-nx** (Banjo-Kazooie: Nuts & Bolts) carries it with its deko3d back end and
+  shader pipeline, retargeted by sa2-nx to SA2 and here to Monster High (`tools/renut/retarget.py`,
+  `docs/d3d-census.md`). reNut has no licence file; its author permits reuse by these ports. banjo-nx's and
+  sa2-nx's parts are GPL-3.0.
+- `app/src/cpu/sa2_enhancements.*`, `app/src/me/sa2_render_mode.*` and `app/src/me/me_platform_compat.h` are sa2-nx's
+  files, taken as they are (GPL-3.0).
+- Used from the sa2-nx tree at build time, not included here: **plume** (MIT; with banjo-nx's deko3d back end),
+  Renut's **XenosRecomp** (MIT) with zstd, smol-v and xxHash, **Dear ImGui** (MIT), and Microsoft's
+  **DirectX Shader Compiler** (University of Illinois/NCSA and LLVM licences), installed into that tree from its
+  official release.
+
 ## Game
 
 Monster High: New Ghoul in School is not part of this repository, in any form. See the disclaimer in `README.md`.

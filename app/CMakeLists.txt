@@ -28,3 +28,10 @@ endif()
 
 # The emulated Xenos GPU (loaded by gpu_plugin = "xenos", src/mhnwis_app.h).
 rexglue_setup_target(mhnwis GPU_PLUGINS xenos)
+
+# Renut's Direct3D-level renderer (the route to the Switch: docs/d3d-census.md), chosen at boot with
+# sa2_renderer = "renut"; the emulated GPU stays the default and the reference.
+option(MHNWIS_RENUT_RENDERER "Link Renut's Direct3D-level renderer (sa2_renderer = renut)" ON)
+if(MHNWIS_RENUT_RENDERER)
+    include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/mhnwis_renut_gpu.cmake")
+endif()

@@ -1,5 +1,5 @@
 // Screenshots for test runs: at each second listed in mhnwis_screenshots ("20,40,60"), the image the game presents
-// (the presenter's guest output, the same source as sa2-nx's sa2_capture) is written to shots/shot_<s>s.ppm next to
+// (the emulated GPU's presenter output or Renut's frame, whichever renders) is written to shots/shot_<s>s.ppm next to
 // the executable. It works with the window minimized and nothing can cover it, so boot tests can stay out of the way.
 
 #include "mhnwis_screenshot.h"
@@ -43,23 +43,22 @@ bool WritePpm(const std::filesystem::path& path, const rex::ui::RawImage& image)
 
 }  // namespace
 
-void Start(std::function<rex::ui::Presenter*()> get_presenter) {
+void Start(std::function<bool(rex::ui::RawImage&)> grab) {
   std::vector<int> seconds;
   std::stringstream list(REXCVAR_GET(mhnwis_screenshots));
   for (std::string item; std::getline(list, item, ',');) {
     if (!item.empty()) seconds.push_back(std::stoi(item));
   }
   if (seconds.empty()) return;
-  std::thread([get_presenter = std::move(get_presenter), seconds = std::move(seconds)]() {
+  std::thread([grab = std::move(grab), seconds = std::move(seconds)]() {
     const auto start = std::chrono::steady_clock::now();
     const auto dir = rex::filesystem::GetExecutableFolder() / "shots";
     std::error_code ec;
     std::filesystem::create_directories(dir, ec);
     for (const int s : seconds) {
       std::this_thread::sleep_until(start + std::chrono::seconds(s));
-      rex::ui::Presenter* presenter = get_presenter();
       rex::ui::RawImage image;
-      if (!presenter || !presenter->CaptureGuestOutput(image) || !image.width) {
+      if (!grab(image) || !image.width) {
         REXLOG_WARN("[shot] {} s: no presented image to capture", s);
         continue;
       }
