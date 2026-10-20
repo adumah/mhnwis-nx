@@ -1,0 +1,22 @@
+# ReXGlue recompilation manifest for Monster High: New Ghoul in School (Xbox 360 disc, title 373407DA, Default.xex).
+#
+# Run tools/codegen.sh: it calls `rexglue codegen mhnwis_manifest.toml`. The project name sets the prefix of everything
+# generated: generated/default/mhnwis_{init,pch,funcs}.h, mhnwis_recomp.N.cpp.
+#
+# Default.xex (internal name MonsterHigh2.exe): image base 0x82000000, entry point 0x8264E2F0, media ID 323E519F,
+# XEX version 5, encrypted + basic compression. XDK 2.0.21256 (D3D9, XAUDIO2, XONLINE), MSVC 16.0.11886.
+# No guest DLLs: the executable names only xam.xex and xboxkrnl.exe, and no XEX2 image is in the data (stage 1,
+# 2026-10-20). nxeart and AvatarAssetPack are STFS packages without code.
+
+[project]
+name = "mhnwis"
+sdk_version = "0.10.0"
+# Your own game files (assets/game_root -> the disc folder). Nothing from the game is distributed with this project.
+game_root = "../assets/game_root"
+
+[entrypoint]
+file_path = "../assets/game_root/Default.xex"
+out_directory_path = "generated/default"
+
+# overrides.toml: written by hand, code the automatic function discovery misses, each entry with its evidence.
+includes = ["overrides.toml"]

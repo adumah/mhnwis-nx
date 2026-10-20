@@ -1,0 +1,18 @@
+# Game files and everything made from them: never committed.
+/disc/
+/assets/
+/cache/
+/app/generated/
+/out/
+
+# Safety net: game file types anywhere in the tree.
+*.xex
+*.iso
+*.hnk
+*.files
+*.wmv
+*.raw
+*.bin
+*.ppm
+AvatarAssetPack
+nxeart
