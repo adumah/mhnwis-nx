@@ -78,3 +78,21 @@ that they are the same too, to be confirmed as the renderer reads them.
 CBlocker::Check (`sub_8265D768`, with `sub_82650958`) runs about 315,000 times a frame: Direct3D waits for the GPU by
 spinning, which is why the main thread reads ~100 % CPU even at 60 fps. Renut completes fences on its own render
 thread, so this wait goes away with the new renderer.
+
+## Other addresses the renderer uses
+
+Renut's CreateDevice hook (sa2-nx `gpu/d3d/hooks/device.cpp`, `Sa2CreateDevice`) calls two of Direct3D's own functions
+and writes two globals. From our hardware path `sub_82683408` and the no-hardware path `sub_82682EE0`:
+
+| What | SA2 | Monster High | Evidence |
+|---|---|---|---|
+| D3D::InitializePresentationParameters (CDevice*, D3DPRESENT_PARAMETERS*) | sub_8255CB20 | **sub_82683188** | The hardware path calls it with the device and arg 5 and fails on 0; D3DDevice_Reset calls it too. |
+| D3D::InitializeApiState (CDevice*) | sub_8255C150 | **sub_826827B8** | Called right after it in the hardware path, and at the end of the no-hardware path. |
+| D3D::XenonGpu_Initialize | (in the type-2 path) | **sub_82670EF8** | First call of the no-hardware path `sub_82682EE0`. |
+| VdGlobalDevice import slot | 0x82000710 | **0x82000794** | The hardware path stores the device at *(0x82000794) for the title process (0x82000790 otherwise); IsFencePending reads the same slots. |
+| Global qword copied to +11008 | 0x82980268 | **0x82C68C38** | `sub_82682E70`: `lis r11,-32057` / `ld r11,-29640(r11)` / `std r11,11008(r3)`. |
+| GetCurrentThreadId | | **sub_82650958** | Stored at +11016 by `sub_82682E70` (SA2's kDeviceOffsetCreationThreadId); the 3-instruction function of the busy-wait. |
+
+Hardware-path fields, all SA2's: critical sections +15348 and +15376; fence word +11024 (128 bytes) and the swap's
+scratch +11028 (32 bytes); -1 at +21968 and +21972; QueryPerformanceFrequency and its reciprocal as floats at +21996 and
++22000; the side buffer (0x12C0 bytes) at +17136; is-title-process at +11020.
