@@ -23,6 +23,7 @@
 #include "mhnwis_shm.h"
 
 #if SA2_RENUT_RENDERER
+#include "cpu/mhnwis_handheld_clocks.h"
 #include "cpu/sa2_enhancements.h"
 #include "renut_engine/gpu/banjo_renut_capture.h"
 #include "renut_engine/gpu/banjo_renut_select.h"
@@ -109,8 +110,9 @@ class MhnwisApp : public rex::ReXApp {
   void OnPostInitLogging() override { sa2::enh::Resolve(); }
 
   void OnPreSetup(rex::RuntimeConfig& config) override {
-    // Handheld: the official 460.8 MHz GPU profile (sa2_gpu_boost; the first console run's GPU was at 307.2 MHz).
-    sa2::enh::ApplyGpuBoost();
+    // Handheld: the docked clocks, GPU 768 MHz and memory 1600 (mhnwis_handheld_clocks.cpp; at 460.8 MHz, sa2_gpu_boost,
+    // the console run of 2026-10-20 was GPU-bound at 38-47 fps; the first one, at 307.2 MHz, at 32).
+    mhnwis::clocks::Start();
     if (banjo::renut_gpu::Active()) {
       renut::gpu::ConfigureRuntime(config);
       REXLOG_INFO("graphics: Renut's Direct3D-level renderer (sa2_renderer = renut)");
@@ -131,6 +133,7 @@ class MhnwisApp : public rex::ReXApp {
   }
   void OnShutdown() override {
     if (banjo::renut_gpu::Active()) renut::gpu::ShutdownRenderer();
+    mhnwis::clocks::Stop();
   }
 #endif
 
