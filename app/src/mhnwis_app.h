@@ -46,8 +46,9 @@ class MhnwisApp : public rex::ReXApp {
   // ("VdInitializeRingBuffer: no GPU emulation loaded (gpu_plugin not set)", 2026-10-20): the emulated Xenos GPU is a
   // plugin, built by GPU_PLUGINS xenos in CMakeLists.txt and loaded by this setting.
   // On the Switch there is no emulated GPU: Renut on deko3d (sa2-nx's sa2_switch_defaults.toml), the game files
-  // packed into one file on the SD at the first start (asset_pack_build), and, for the first console tests, the log
-  // on (logs/ next to the NRO) so a run can be read back.
+  // packed into one file on the SD at the first start (asset_pack_build), and the log on (logs/ next to the NRO: the
+  // first start's packing progress, and what a bug report needs). The GPU profile of the console tests is off
+  // (renut_gpu_profile = 10.0 and banjo_renut_diag_gpu_shaders = true in mhnwis.toml turn it on again).
   std::string_view BuiltInConfig() const override {
 #if REX_PLATFORM_SWITCH
     return "sa2_renderer = \"renut\"\n"
@@ -58,8 +59,6 @@ class MhnwisApp : public rex::ReXApp {
            "asset_pack_build = true\n"
            "log_level = \"info\"\n"
            "log_to_file = true\n"
-           "renut_gpu_profile = 10.0\n"  // the GPU's time per kind of work, every 10 s (test builds)
-           "banjo_renut_diag_gpu_shaders = true\n"  // and split by pixel shader (test builds)
            // The face buttons by letter, as other Switch games: the Switch's A acts as the Xbox A (the SDK's default
            // is by position, its bottom button B as A).
            "input_xbox_layout = false\n";

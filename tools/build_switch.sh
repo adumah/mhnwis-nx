@@ -23,6 +23,8 @@ if [[ ! -f "$stub/lib/libvulkan.a" ]]; then
   "$DEVKITPRO/devkitA64/bin/aarch64-none-elf-ar" rcs "$stub/lib/libvulkan.a"
 fi
 mkdir -p "$root/out"
+# The homebrew menu icon: your disc's dashboard art (tools/disc_icon.py; game art, in out/ only), else the project's.
+python3 "$root/tools/disc_icon.py" "$root/assets/game_root" "$root/out/nx_icon.jpg"
 if [[ ! -f "$build/build.ninja" ]]; then
   cmake -S "$root/app" -B "$build" -G Ninja -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE="$sa2/tools/switch/cmake/switch-devkitA64.cmake" -DDEVKITPRO="$DEVKITPRO" \

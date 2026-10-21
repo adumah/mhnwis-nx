@@ -52,11 +52,18 @@ if(REXGLUE_PLATFORM_SWITCH)
     if(TARGET rexcore)
         target_compile_definitions(rexcore PRIVATE REX_SWITCH_FALLBACK_EXE="/switch/mhnwis-nx/mhnwis.nro")
     endif()
-    # The homebrew menu's entry, with libnx's default icon (no game artwork).
+    # The homebrew menu's entry. Its icon is made at build time from your own disc's dashboard art (tools/disc_icon.py,
+    # run by tools/build_switch.sh, into out/: game art, never committed); without it, app/switch/icon.jpg (original
+    # artwork, tools/make_icon.py).
+    set(MHNWIS_NRO_ICON "${CMAKE_CURRENT_SOURCE_DIR}/../out/nx_icon.jpg")
+    if(NOT EXISTS "${MHNWIS_NRO_ICON}")
+        set(MHNWIS_NRO_ICON "${CMAKE_CURRENT_SOURCE_DIR}/switch/icon.jpg")
+    endif()
     rexglue_switch_add_nro(mhnwis
         NAME "Monster High: New Ghoul in School"
         AUTHOR "mhnwis-nx (unofficial)"
-        VERSION "0.1.0")
+        VERSION "1.0.0"
+        ICON "${MHNWIS_NRO_ICON}")
 endif()
 
 # Renut's Direct3D-level renderer (the route to the Switch: docs/d3d-census.md), chosen at boot with

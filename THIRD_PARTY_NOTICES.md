@@ -83,4 +83,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## Game
 
-Monster High: New Ghoul in School is not part of this repository, in any form. See the disclaimer in `README.md`.
+Monster High: New Ghoul in School (developed by Torus Games, published by Little Orbit; Monster High is a trademark
+of Mattel, Inc.) is not part of this repository, in any form. See the disclaimer in `README.md`. The homebrew menu
+icon is made at build time from the player's own disc (`tools/disc_icon.py`) and is not in this repository; the
+fallback icon (`app/switch/icon.jpg`, drawn by `tools/make_icon.py`) is original artwork, with no art from the game
+or Mattel.
