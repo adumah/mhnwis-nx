@@ -57,7 +57,11 @@ class MhnwisApp : public rex::ReXApp {
            "asset_pack_build = true\n"
            "log_level = \"info\"\n"
            "log_to_file = true\n"
-           "renut_gpu_profile = 10.0\n";  // the GPU's time per kind of work, every 10 s (test builds)
+           "renut_gpu_profile = 10.0\n"  // the GPU's time per kind of work, every 10 s (test builds)
+           "banjo_renut_diag_gpu_shaders = true\n"  // and split by pixel shader (test builds)
+           // The face buttons by letter, as other Switch games: the Switch's A acts as the Xbox A (the SDK's default
+           // is by position, its bottom button B as A).
+           "input_xbox_layout = false\n";
 #else
     return "gpu_plugin = \"xenos\"\n";
 #endif
