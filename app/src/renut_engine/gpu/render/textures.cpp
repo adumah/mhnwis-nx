@@ -24,6 +24,17 @@
 #include "renut_engine/gpu/render/graphics_options.h"
 #include "renut_engine/gpu/backend/video.h"
 
+#include <rex/cvar.h>
+
+// mhnwis (2026-10-20): Monster High's engine (Torus) binds most textures by writing the device's fetch constant
+// (m_Constants.TextureFetch, +0x480) directly, the XDK's inline path, leaving the D3D slot (+12920) null: the game's
+// SetTexture (sub_82661278) runs ~48 times a frame against 388 draws, and a draw log of the intro showed every slot
+// null at every draw while the fetch constants held textures. With a null slot Renut bound its null texture: the
+// G-buffer's base colour came out black (its normals, which need no texture, were right).
+REXCVAR_DEFINE_BOOL(mhnwis_renut_fetch_only_textures, true, "MHNWIS",
+                    "Renut: a texture fetch whose device slot has no texture object is bound from the device's fetch "
+                    "constant alone (false: the null texture, as sa2-nx)");
+
 namespace renut::gpu {
 
 namespace {
@@ -1071,12 +1082,21 @@ TextureBinding BindTextureLocked(u32 texture_va, const TextureFetch &device_fetc
   TextureBinding binding;
   binding.dimension = HostDimension(device_fetch);
   binding.slot = NullSlot(binding.dimension);
-  if (!texture_va)
+  // mhnwis: no texture object, only the device's fetch constant (mhnwis_renut_fetch_only_textures). Its cache key
+  // stands for the texture object the rest of this path keys by (never dereferenced): a hash of what the fetch
+  // constant describes, made odd so it cannot equal a real (4-byte aligned) header.
+  const bool fetch_only = !texture_va;
+  if (fetch_only) {
+    if (!REXCVAR_GET(mhnwis_renut_fetch_only_textures) || !device_fetch.IsTexture())
+      return binding;
+    u32 key_desc[6];
+    MaskedDesc(device_fetch, key_desc);
+    texture_va = u32(XXH3_64bits(key_desc, sizeof(key_desc))) | 1u;
+  }
+  const auto *header = fetch_only ? nullptr : GuestPtr<const d3d::BaseTexture>(texture_va);
+  if (!fetch_only && !header)
     return binding;
-  const auto *header = GuestPtr<const d3d::BaseTexture>(texture_va);
-  if (!header)
-    return binding;
-  TextureFetch fetch = TextureFetch::FromHeader(header->Format);
+  TextureFetch fetch = fetch_only ? device_fetch : TextureFetch::FromHeader(header->Format);
   // SetTexture copied the header into the device's fetch constant. A header
   // that no longer matches it was a temporary the game has overwritten since
   // (a command buffer runs after its recording thread's stack moved on); the

@@ -14,6 +14,7 @@ include(generated/rexglue.cmake)
 set(MHNWIS_SOURCES
     src/main.cpp
     src/mhnwis_screenshot.cpp
+    src/mhnwis_shm.cpp
 )
 
 # Diagnostic sources added for one build only, e.g. the Direct3D census (tools/d3d/census_build.py). Empty normally.

@@ -19,6 +19,7 @@
 #include <rex/ui/presenter.h>
 
 #include "mhnwis_screenshot.h"
+#include "mhnwis_shm.h"
 
 #if SA2_RENUT_RENDERER
 #include "renut_engine/gpu/banjo_renut_capture.h"
@@ -42,6 +43,8 @@ class MhnwisApp : public rex::ReXApp {
   std::string_view BuiltInConfig() const override { return "gpu_plugin = \"xenos\"\n"; }
 
   void OnPostSetup() override {
+    // The guest memory is mapped now: its /dev/shm file can go (mhnwis_shm.cpp).
+    mhnwis::shm::UnlinkOwnFile();
     // Every controller plays as user 0, the only signed-in user (XamUserGetSigninState reports users 1-3 signed out).
     // With the SDK's default slot policy a second pad was user 1: Start on it at the title screen left the main menu
     // without its panel (background only), most likely waiting on a sign-in for user 1 (player's run, 2026-10-20:
@@ -101,6 +104,8 @@ class MhnwisApp : public rex::ReXApp {
   // unless the config or command line already set game_data_root. The disc names the executable Default.xex; the
   // guest's own lookups are case-insensitive, but this check runs on the host filesystem, so both spellings count.
   void OnConfigurePaths(rex::PathConfig& paths) override {
+    // Before the guest memory is created: free what killed or crashed runs left in /dev/shm (mhnwis_shm.cpp).
+    mhnwis::shm::RemoveStaleFiles();
     if (!paths.game_data_root.empty()) {
       return;
     }
