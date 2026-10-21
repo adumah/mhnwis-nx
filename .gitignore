@@ -16,3 +16,7 @@
 *.ppm
 AvatarAssetPack
 nxeart
+
+# Python caches
+__pycache__/
+*.pyc

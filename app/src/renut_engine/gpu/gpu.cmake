@@ -73,9 +73,16 @@ set_target_properties(renut_smolv PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set(RENUT_DXC_BIN_DIR "${RENUT_XENOS_RECOMP_DIR}/thirdparty/dxc-bin/bin/x64")
 if(CMAKE_HOST_WIN32)
     set(RENUT_DXC "${RENUT_DXC_BIN_DIR}/dxc.exe")
+    set(RENUT_DXC_PROGRAM "${RENUT_DXC}")
 else()
     # The Linux binary finds libdxcompiler next to it.
     set(RENUT_DXC env "LD_LIBRARY_PATH=${RENUT_XENOS_RECOMP_DIR}/thirdparty/dxc-bin/lib/x64" "${RENUT_DXC_BIN_DIR}/dxc-linux")
+    # mhnwis: the same as one program, for tools that take DXC as a single path (deko3d_host_shader.py --dxc).
+    set(RENUT_DXC_PROGRAM "${CMAKE_BINARY_DIR}/renut_dxc.sh")
+    file(WRITE "${RENUT_DXC_PROGRAM}"
+         "#!/bin/sh\nLD_LIBRARY_PATH=\"${RENUT_XENOS_RECOMP_DIR}/thirdparty/dxc-bin/lib/x64\" exec \"${RENUT_DXC_BIN_DIR}/dxc-linux\" \"$@\"\n")
+    file(CHMOD "${RENUT_DXC_PROGRAM}" PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
+         WORLD_READ WORLD_EXECUTE)
 endif()
 
 # renut_host_shader(<target> <stem> <profile>) compiles gpu/shaders/host/<stem>.hlsl
@@ -120,7 +127,7 @@ function(renut_host_shader TARGET STEM PROFILE)
         add_custom_command(
             OUTPUT "${out}"
             COMMAND ${CMAKE_COMMAND} -E make_directory "${RENUT_GPU_GEN_DIR}/host_shaders"
-            COMMAND "${PYTHON_EXECUTABLE}" "${tool}" --dxc ${RENUT_DXC} --spirv-cross "${BANJO_DEKO3D_SPIRV_CROSS}"
+            COMMAND "${PYTHON_EXECUTABLE}" "${tool}" --dxc ${RENUT_DXC_PROGRAM} --spirv-cross "${BANJO_DEKO3D_SPIRV_CROSS}"
                     --uam "${BANJO_DEKO3D_UAM}" --profile ${PROFILE} --stem ${STEM} --src "${src}" --out "${out}"
             DEPENDS "${src}" ${host_includes} "${tool}" "${RENUT_TOOLS_DIR}/deko3d_glsl.py"
             COMMENT "Compiling host shader ${STEM}.hlsl (${PROFILE}, deko3d)"

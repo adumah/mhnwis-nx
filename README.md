@@ -17,7 +17,7 @@ through the SDK's emulated Xbox 360 GPU (Vulkan) in this build.
 | Performance | 60 fps in most places on a Steam Deck; about 53-57 fps in large open rooms with many characters (the emulated GPU's cost) |
 | Controllers | Any controller plays as player 1 |
 | Renut's renderer | Experimental, PC: `tools/run.sh --sa2_renderer=renut` (menus and gameplay render; the emulated GPU stays the default) |
-| Nintendo Switch | Not yet (Renut's deko3d back end comes next) |
+| Nintendo Switch | First test build (Renut on deko3d): `tools/build_switch.sh`, see [Switch](#switch); not yet tested on a console |
 
 Tested on a Steam Deck running CachyOS, with clang 23.1.1.
 
@@ -83,6 +83,22 @@ Renut's Direct3D-level renderer (the route to the Switch, `docs/d3d-census.md`) 
 translated ahead of time. They are game data, so the first build has none: run the game once with
 `--sa2_renderer=renut` (it captures every shader it lacks into `out/pc/shader_capture/`), then build again, which
 translates them into the program. Places the game had not shown yet are captured on the next visit.
+
+## Switch
+
+Needs devkitPro (devkitA64, libnx, deko3d, switch-tools) and a console that runs homebrew. After the PC build and a
+run with `--sa2_renderer=renut` (so the game's shaders are captured):
+
+```sh
+mhnwis-nx/tools/deko3d_build_tools.sh     # SPIRV-Cross and uam for the PC (once)
+mhnwis-nx/tools/renut/switch_shaders.sh   # the game's shaders for deko3d, from the PC build
+mhnwis-nx/tools/build_switch.sh -j 4      # out/nx/mhnwis.nro
+python3 mhnwis-nx/tools/check_switch_build.py --sdk-vulkan /nonexistent
+mhnwis-nx/tools/package_switch.sh --with-game   # out/nx/sdcard: copy its switch folder to the card
+```
+
+The NRO draws with Renut on deko3d and links no Vulkan driver. It holds the game's translated code and shaders, and
+the card folder holds your game: both are for your own console only.
 
 ## Disclaimer
 

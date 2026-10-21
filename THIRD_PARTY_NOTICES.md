@@ -73,6 +73,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   **DirectX Shader Compiler** (University of Illinois/NCSA and LLVM licences), installed into that tree from its
   official release.
 
+## Switch build tools
+
+- **deko3d**, **libnx** and devkitA64 from devkitPro (installed separately).
+- **SPIRV-Cross** (KhronosGroup, Apache-2.0), tag vulkan-sdk-1.4.363.0, built by `tools/deko3d_build_tools.sh`.
+- **uam** (zlib; SwitchWakerHD's patched 1.1.0, as sa2-nx carries it), built from the sa2-nx tree.
+- `tools/renut/deko3d_*.py`, `tools/renut/renut_switch_shader_cache.py` and `tools/check_switch_build.py` are copies of
+  sa2-nx's (and through it banjo-nx's, sasrt-nx's and nfsmw-nx's) tools, GPL-3.0, adapted as each file's header says.
+
 ## Game
 
 Monster High: New Ghoul in School is not part of this repository, in any form. See the disclaimer in `README.md`.

@@ -14,6 +14,7 @@
 #include <rex/filesystem.h>
 #include <rex/input/device_assignment.h>
 #include <rex/input/input_system.h>
+#include <rex/platform.h>
 #include <rex/rex_app.h>
 #include <rex/runtime.h>
 #include <rex/ui/presenter.h>
@@ -27,7 +28,9 @@
 #include "renut_engine/gpu/overlay/app_integration.h"
 #endif
 
+#if MHNWIS_PERF_CSV
 REXCVAR_DECLARE(std::string, perf_log_csv);
+#endif
 
 class MhnwisApp : public rex::ReXApp {
  public:
@@ -40,7 +43,23 @@ class MhnwisApp : public rex::ReXApp {
   // Defaults applied before mhnwis.toml (which may override any of them). The first boot ran without a GPU
   // ("VdInitializeRingBuffer: no GPU emulation loaded (gpu_plugin not set)", 2026-10-20): the emulated Xenos GPU is a
   // plugin, built by GPU_PLUGINS xenos in CMakeLists.txt and loaded by this setting.
-  std::string_view BuiltInConfig() const override { return "gpu_plugin = \"xenos\"\n"; }
+  // On the Switch there is no emulated GPU: Renut on deko3d (sa2-nx's sa2_switch_defaults.toml), the game files
+  // packed into one file on the SD at the first start (asset_pack_build), and, for the first console tests, the log
+  // on (logs/ next to the NRO) so a run can be read back.
+  std::string_view BuiltInConfig() const override {
+#if REX_PLATFORM_SWITCH
+    return "sa2_renderer = \"renut\"\n"
+           "renut_gpu_backend = \"deko3d\"\n"
+           "sa2_render_height_handheld = 720\n"
+           "sa2_render_height_docked = 1080\n"
+           "asset_pack = true\n"
+           "asset_pack_build = true\n"
+           "log_level = \"info\"\n"
+           "log_to_file = true\n";
+#else
+    return "gpu_plugin = \"xenos\"\n";
+#endif
+  }
 
   void OnPostSetup() override {
     // The guest memory is mapped now: its /dev/shm file can go (mhnwis_shm.cpp).
@@ -55,9 +74,11 @@ class MhnwisApp : public rex::ReXApp {
     }
     // The SDK defines perf_log_csv (a per-frame CSV of its perf counters, written at each Flip) but nothing opens the
     // file: open it here. tools/play.sh records with it.
+#if MHNWIS_PERF_CSV
     if (!REXCVAR_GET(perf_log_csv).empty()) {
       rex::perf::SetCsvLogPath(REXCVAR_GET(perf_log_csv));
     }
+#endif
     // Test-run screenshots (mhnwis_screenshots, mhnwis_screenshot.cpp), taken from the frame on screen.
 #if SA2_RENUT_RENDERER
     if (banjo::renut_gpu::Active()) {
@@ -114,8 +135,13 @@ class MhnwisApp : public rex::ReXApp {
     for (auto candidate = folder; !candidate.empty(); candidate = candidate.parent_path()) {
       for (const auto& sub : {std::filesystem::path("game_root"), std::filesystem::path("assets") / "game_root"}) {
         const auto root = candidate / sub;
+        // Or only its asset pack (the Switch: game_root.nxpack + .nxidx, which the SDK builds from the folder at the
+        // first start; the folder may be deleted after that).
+        auto pack = root;
+        pack += ".nxpack";
         if (std::filesystem::is_regular_file(root / "Default.xex", ec) ||
-            std::filesystem::is_regular_file(root / "default.xex", ec)) {
+            std::filesystem::is_regular_file(root / "default.xex", ec) ||
+            std::filesystem::is_regular_file(pack, ec)) {
           paths.game_data_root = root;
           return;
         }
