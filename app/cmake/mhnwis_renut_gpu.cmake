@@ -98,6 +98,7 @@ add_library(mhnwis_renut_gpu OBJECT
     # sa2-nx's support code the renderer uses (taken as it is) and this port's stand-ins for the SA2-specific parts.
     "${CMAKE_SOURCE_DIR}/src/cpu/sa2_enhancements.cpp"
     "${CMAKE_SOURCE_DIR}/src/cpu/mhnwis_enhancements_port.cpp"
+    "${CMAKE_SOURCE_DIR}/src/cpu/sa2_gpu_boost.cpp"
     "${CMAKE_SOURCE_DIR}/src/me/sa2_render_mode.cpp"
     "${CMAKE_SOURCE_DIR}/src/renut_engine/mhnwis_renut_port.cpp")
 target_include_directories(mhnwis_renut_gpu PRIVATE

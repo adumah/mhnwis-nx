@@ -23,6 +23,7 @@
 #include "mhnwis_shm.h"
 
 #if SA2_RENUT_RENDERER
+#include "cpu/sa2_enhancements.h"
 #include "renut_engine/gpu/banjo_renut_capture.h"
 #include "renut_engine/gpu/banjo_renut_select.h"
 #include "renut_engine/gpu/overlay/app_integration.h"
@@ -55,7 +56,8 @@ class MhnwisApp : public rex::ReXApp {
            "asset_pack = true\n"
            "asset_pack_build = true\n"
            "log_level = \"info\"\n"
-           "log_to_file = true\n";
+           "log_to_file = true\n"
+           "renut_gpu_profile = 10.0\n";  // the GPU's time per kind of work, every 10 s (test builds)
 #else
     return "gpu_plugin = \"xenos\"\n";
 #endif
@@ -97,7 +99,14 @@ class MhnwisApp : public rex::ReXApp {
 #if SA2_RENUT_RENDERER
   // Renut's renderer (as sa2-nx's sa2_app.h wires it): no SDK graphics system and no GPU plugin; its own drawer for
   // the SDK's menus, its own swapchain resizing, started once the window exists (the paths are final then).
+  // Which of sa2-nx's enhancement switches run (own key and group master), before any guest thread exists, as sa2-nx's
+  // OnPostInitLogging does. Without it every SA2_ENHANCEMENT stayed inactive: among them sa2_vsync_relaxed, so on the
+  // first console run every frame that missed 1/60 s waited for the next one (274 of 320 frames late a 10 s, 32 fps).
+  void OnPostInitLogging() override { sa2::enh::Resolve(); }
+
   void OnPreSetup(rex::RuntimeConfig& config) override {
+    // Handheld: the official 460.8 MHz GPU profile (sa2_gpu_boost; the first console run's GPU was at 307.2 MHz).
+    sa2::enh::ApplyGpuBoost();
     if (banjo::renut_gpu::Active()) {
       renut::gpu::ConfigureRuntime(config);
       REXLOG_INFO("graphics: Renut's Direct3D-level renderer (sa2_renderer = renut)");
