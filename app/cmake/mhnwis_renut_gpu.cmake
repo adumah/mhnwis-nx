@@ -43,6 +43,10 @@ if(NOT PYTHON_EXECUTABLE)
     set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
 endif()
 
+# This project's copy of Renut's shader_common.h (the HLSL every translated shader includes), with the fetch
+# constant's exponent adjust applied to texture fetches (src/renut_engine/gpu/shaders/xenos/shader_common.h).
+set(RENUT_SHADER_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/renut_engine/gpu/shaders/xenos")
+
 include("${CMAKE_SOURCE_DIR}/src/renut_engine/gpu/gpu.cmake")
 
 add_library(mhnwis_renut_gpu OBJECT

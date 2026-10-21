@@ -16,7 +16,8 @@ through the SDK's emulated Xbox 360 GPU (Vulkan) in this build.
 | Linux (x86-64) | Playable: boot, intro movies, menus, gameplay, saving and loading |
 | Performance | 60 fps in most places on a Steam Deck; about 53-57 fps in large open rooms with many characters (the emulated GPU's cost) |
 | Controllers | Any controller plays as player 1 |
-| Nintendo Switch | Not yet (needs a native renderer first) |
+| Renut's renderer | Experimental, PC: `tools/run.sh --sa2_renderer=renut` (menus and gameplay render; the emulated GPU stays the default) |
+| Nintendo Switch | Not yet (Renut's deko3d back end comes next) |
 
 Tested on a Steam Deck running CachyOS, with clang 23.1.1.
 
@@ -39,8 +40,9 @@ git clone https://github.com/adumah/mhnwis-nx.git
 git clone https://github.com/ChanseyIsTheBest/sa2-nx.git
 git -C sa2-nx checkout adf3a4eee524dcca5cd7c1b42454ddb8a09124a1
 
-# 2. The code generator (once)
+# 2. The code generator and the shader compiler Renut's renderer needs (once)
 mhnwis-nx/tools/build_sdk.sh
+mhnwis-nx/tools/fetch_dxc.sh
 
 # 3. Your game: link your extracted disc folder (the one holding Default.xex)
 mkdir -p mhnwis-nx/assets
@@ -65,6 +67,7 @@ Saves are written to `~/.local/share/mhnwis/`.
 | Script | What it does |
 |---|---|
 | `tools/build_sdk.sh` | Builds the sa2-nx SDK's code generator on Linux |
+| `tools/fetch_dxc.sh` | Installs Microsoft's DirectX Shader Compiler (pinned release, checksum-checked) into the sa2-nx tree for Renut's shaders |
 | `tools/codegen.sh` | Translates `Default.xex` to C++ (`app/generated/`), with `app/mhnwis_manifest.toml` |
 | `tools/build_pc.sh` | Builds `out/pc/mhnwis` |
 | `tools/run.sh` | Plays |
@@ -73,6 +76,13 @@ Saves are written to `~/.local/share/mhnwis/`.
 | `tools/pointer_fixpoint.py` | Finds functions reached only through pointers (adapted from sa2-nx) |
 
 `app/overrides.toml` holds every correction to the code generator's analysis, each with the evidence for it.
+
+## Renut's renderer and its shaders
+
+Renut's Direct3D-level renderer (the route to the Switch, `docs/d3d-census.md`) draws with the game's shaders
+translated ahead of time. They are game data, so the first build has none: run the game once with
+`--sa2_renderer=renut` (it captures every shader it lacks into `out/pc/shader_capture/`), then build again, which
+translates them into the program. Places the game had not shown yet are captured on the next visit.
 
 ## Disclaimer
 

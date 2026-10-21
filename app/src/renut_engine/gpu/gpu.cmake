@@ -11,7 +11,10 @@ include(ExternalProject)
 
 set(RENUT_GPU_DIR "${CMAKE_CURRENT_LIST_DIR}")
 set(RENUT_XENOS_RECOMP_DIR "${RENUT_THIRDPARTY_DIR}/reblue-XenosRecomp")
-set(RENUT_SHADER_COMMON_DIR "${RENUT_XENOS_RECOMP_DIR}/XenosRecomp")
+# mhnwis: a project may bring its own shader_common.h (cmake/mhnwis_renut_gpu.cmake: the exponent adjust).
+if(NOT DEFINED RENUT_SHADER_COMMON_DIR)
+    set(RENUT_SHADER_COMMON_DIR "${RENUT_XENOS_RECOMP_DIR}/XenosRecomp")
+endif()
 set(RENUT_GPU_GEN_DIR "${CMAKE_BINARY_DIR}/renut_gpu")
 
 set(RENUT_SHADER_DUMP_DIR "${CMAKE_SOURCE_DIR}/shaders" CACHE PATH

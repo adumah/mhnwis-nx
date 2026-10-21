@@ -171,6 +171,8 @@ constexpr uint32_t kStackedLayerWrapBit = 0x20000000u;
 // factor the shaders divide the texture's size by for texel offsets and
 // texel coordinates (RENUT_RESOLUTION_SCALE_SHIFT in shader_common.h).
 constexpr uint32_t kResolutionScaleShift = 26;
+// mhnwis: bits 20-25 of a texture index, the fetch constant's exponent adjust (shader_common.h renutExpAdjust).
+constexpr uint32_t kExpAdjustShift = 20;
 // The most host levels a resolve destination gets (ExtraLevels).
 constexpr uint32_t kMaxExtraLevels = 3;
 

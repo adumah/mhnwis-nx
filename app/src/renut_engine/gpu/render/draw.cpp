@@ -2033,6 +2033,10 @@ void FillTextures(const GuestDevice &device, u32 fetch_mask, SharedConstants &sc
     // shader_common.h), with the fetch constant's filter between layers and
     // its Z address mode.
     u32 index = binding.slot | binding.scale.code << kResolutionScaleShift;
+    // mhnwis (2026-10-20): the fetch constant's exponent adjust (dword 3 bits 13-18), which the fetch applies
+    // (renutExpAdjust, shaders/xenos/shader_common.h): bits 20-25, above the bindless index (8192 entries).
+    index |= ((fetch.dword[3] >> 13) & 0x3Fu) << kExpAdjustShift;
+    static_assert(kTextureDescriptorCount <= (1u << kExpAdjustShift), "bindless index overlaps the exponent adjust");
     if (binding.stacked) {
       index |= kStackedTextureBit;
       if (fetch.VolumeMagFilter() != TextureFilter::Point ||
